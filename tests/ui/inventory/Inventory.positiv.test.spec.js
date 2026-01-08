@@ -1,4 +1,4 @@
-import { test } from "../../base/Fixtures.js";
+import { test } from "../../../base/Fixtures";
 
 test.describe("Inventoty tests Happy path", () => {
   test("Add new item tes", async ({ homePage }) => {
