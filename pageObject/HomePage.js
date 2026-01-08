@@ -10,6 +10,7 @@ export class HomePage {
     this.priceInput = page.locator("//input[@id='itemPrice']");
     this.stockInput = page.locator("//input[@id='itemStock']");
     this.addButton = page.locator("//button[text()='Add Item']");
+    this.itemNameColumn = page.locator("//table//tbody/tr/td[2]");
   }
 
   /**
@@ -36,5 +37,23 @@ export class HomePage {
     await expect(lastRow).toContainText(itemName);
     await expect(lastRow).toContainText(`${itemPrice}`);
     await expect(lastRow).toContainText(itemStock);
+    const lastItemName = await this.itemNameColumn.last();
+    await expect(lastItemName).not.toBeEmpty();
   }
+
+  /**
+   * add new item without item name to the inventory and verify it is not added
+   */
+  async addNewItemWithoutItemName(itemName, itemPrice, itemStock) {
+    await this.nameInput.fill(itemName);
+    await this.priceInput.fill(itemPrice);
+    await this.stockInput.fill(itemStock);
+    await this.addButton.click();
+    const lastItemName = await this.itemNameColumn.last();
+    await expect(lastItemName).not.toBeEmpty();
+  }
+
+  /**
+   * 
+   */
 }
