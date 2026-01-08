@@ -13,16 +13,16 @@ export const test = base.extend({
     // taking screenshot
     if (testInfo.status !== testInfo.expectedStatus) {
       await page.screenshot({
-        path: "test-output/screenshot.png",
+        // create date-time folder for screenshots
+
+        path: "test-output/screenshot_" + Date.now() + ".png",
         fullPage: true,
       });
     }
- // close the browser after tests are done
+    // close the browser after tests are done
     await page.waitForTimeout(1000);
     await page.close();
   },
-
- 
 
   homePage: async ({ page }, use) => {
     await use(new HomePage(page));
