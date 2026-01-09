@@ -8,6 +8,8 @@ export const test = base.extend({
     await page.goto(process.env.BASE_URL, {
       waitUntil: "domcontentloaded",
     });
+    const homePage = new HomePage(page);
+    await homePage.verifyElementVisibility();
     // run the tests
     await use(page);
     // taking screenshot

@@ -1,4 +1,5 @@
 import { expect } from "@playwright/test";
+import { Helper } from "../base/Helper";
 
 export class HomePage {
   // Define locators
@@ -11,6 +12,8 @@ export class HomePage {
     this.stockInput = page.locator("//input[@id='itemStock']");
     this.addButton = page.locator("//button[text()='Add Item']");
     this.itemNameColumn = page.locator("//table//tbody/tr/td[2]");
+    this.itemPriceColumn = page.locator("//table//tbody/tr/td[3]");
+    this.itemStockColumn = page.locator("//table//tbody/tr/td[4]");
     this.invoiceCreatedConfirmation = page.locator(
       "//p[text()='Invoice Created!']"
     );
@@ -20,7 +23,14 @@ export class HomePage {
     this.createInvoiceButton = page.locator(
       "//button[text()='Create Invoice']"
     );
+    this.invoiceStringData = page.locator(
+      "//div[@id='invoiceResult']/p/following-sibling::*[1]"
+    );
   }
+
+  // =======================================================
+  // INVENTORY TEST METHODS START HERE
+  // ==================================================
 
   /**
    * verfying visibility of the elements
@@ -43,13 +53,13 @@ export class HomePage {
    */
   async addNewItemAndVerify(itemName, itemPrice, itemStock) {
     await this.nameInput.fill(itemName);
-    await this.priceInput.fill(itemPrice);
-    await this.stockInput.fill(itemStock);
+    await this.priceInput.fill(`${itemPrice}`);
+    await this.stockInput.fill(`${itemStock}`);
     await this.addButton.click();
     const lastRow = await this.tablerows.last();
     await expect(lastRow).toContainText(itemName);
     await expect(lastRow).toContainText(`${itemPrice}`);
-    await expect(lastRow).toContainText(itemStock);
+    await expect(lastRow).toContainText(`${itemStock}`);
     const lastItemName = await this.itemNameColumn.last();
     await expect(lastItemName).not.toBeEmpty();
   }
@@ -59,8 +69,8 @@ export class HomePage {
    */
   async addNewItemWithoutItemName(itemName, itemPrice, itemStock) {
     await this.nameInput.fill(itemName);
-    await this.priceInput.fill(itemPrice);
-    await this.stockInput.fill(itemStock);
+    await this.priceInput.fill(`${itemPrice}`);
+    await this.stockInput.fill(`${itemStock}`);
     await this.addButton.click();
     const lastItemName = await this.itemNameColumn.last();
     await expect(lastItemName).not.toBeEmpty();
@@ -69,23 +79,27 @@ export class HomePage {
   /**
    * verify item name cannot be special characters
    */
-  async verifyItemNameNoSpecialCharacters(itemName) {
+  async verifyItemNameNoSpecialCharacters(itemName, itemPrice, itemStock) {
     await this.nameInput.fill(itemName);
-    const nameValue = await this.nameInput.inputValue();
-    expect(nameValue).not.toMatch(/[^a-zA-Z0-9\s]/);
+    await this.priceInput.fill(`${itemPrice}`);
+    await this.stockInput.fill(`${itemStock}`);
+    await this.addButton.click();
+    const sentItemTitle = await this.itemNameColumn.last().textContent();
+    await this.page.waitForTimeout(1000);
+    expect(sentItemTitle).not.toMatch(/[^a-zA-Z0-9\s]/);
   }
 
   /**
    * verify item is duplicated
    */
 
-  async verifyItemIsDuplicated(itemName) {
+  async verifyItemIsDuplicated(itemName, itemPrice, itemStock) {
     // we are intentilally adding the same item again to verify it is not duplicated
     // step one to add same item twice
     for (let i = 0; i < 2; i++) {
       await this.nameInput.fill(itemName);
-      await this.priceInput.fill("1700");
-      await this.stockInput.fill("9");
+      await this.priceInput.fill(`${itemPrice}`);
+      await this.stockInput.fill(`${itemStock}`);
       await this.addButton.click();
       await this.page.waitForTimeout(1000);
     }
@@ -107,47 +121,75 @@ export class HomePage {
    * verifying stock input accepts only non decimal values
    */
 
-  async verifyStockInputNonDecimalValues(stock) {
+  async verifyStockInputNonDecimalValues(itemName, itemPrice, stock) {
+    await this.nameInput.fill(itemName);
+    await this.priceInput.fill(`${itemPrice}`);
     await this.stockInput.fill(`${stock}`);
-    const stockValue = await this.stockInput.inputValue();
+    await this.addButton.click();
+    await this.page.waitForTimeout(1000);
+    const stockValue = await this.itemStockColumn.last().textContent();
     expect(stockValue).not.toContain(".");
   }
 
   /**
    * verifying negative values are not accepted in price input
    */
-  async verifyPriceInputNonNegativeValues(price) {
-    await this.priceInput.fill(`${price}`);
-    const priceValue = await this.priceInput.inputValue();
-    expect(Number(priceValue)).toBeGreaterThan(0);
+  async verifyPriceInputNonNegativeValues(itemName, itemPrice, stock) {
+    await this.nameInput.fill(itemName);
+    await this.priceInput.fill(`${itemPrice}`);
+    await this.stockInput.fill(`${stock}`);
+    await this.addButton.click();
+    await this.page.waitForTimeout(1000);
+    const priceValue = await this.itemPriceColumn.last().textContent();
+    expect(Number(priceValue.substring(1))).toBeGreaterThan(0);
   }
 
   /**
    * veiryfying negative values are not accepted in stock input
    */
-  async verifyStockInputNonNegativeValues(stock) {
+  async verifyStockInputNonNegativeValues(itemName, itemPrice, stock) {
+    await this.nameInput.fill(itemName);
+    await this.priceInput.fill(`${itemPrice}`);
     await this.stockInput.fill(`${stock}`);
-    const stockValue = await this.stockInput.inputValue();
+    await this.addButton.click();
+    await this.page.waitForTimeout(1000);
+    const stockValue = await this.itemStockColumn.last().textContent();
     expect(Number(stockValue)).toBeGreaterThan(0);
   }
 
   /**
    * verifying price input accepts only positive values
    */
-  async verifyPriceInputPositiveValues(price) {
-    await this.priceInput.fill(`${price}`);
-    const priceValue = await this.priceInput.inputValue();
+  async verifyPriceInputPositiveValues(itemName, itemPrice, stock) {
+    await this.nameInput.fill(itemName);
+    await this.priceInput.fill(`${itemPrice}`);
+    await this.stockInput.fill(`${stock}`);
+    await this.addButton.click();
+    await this.page.waitForTimeout(1000);
+    const priceValue = await this.itemPriceColumn.last().textContent();
     expect(Number(priceValue)).toBeGreaterThan(0);
   }
 
   /**
    * verify item name cannot be mor than 20 characters
    */
-  async verifyItemNameMaxLength(itemName) {
+  async verifyItemNameMaxLength(itemName, itemPrice, stock) {
     await this.nameInput.fill(itemName);
-    const nameValue = await this.nameInput.inputValue();
+    await this.priceInput.fill(`${itemPrice}`);
+    await this.stockInput.fill(`${stock}`);
+    await this.addButton.click();
+    await this.page.waitForTimeout(1000);
+    const nameValue = await this.itemNameColumn.last().textContent();
     expect(nameValue.length).toBeLessThanOrEqual(20);
   }
+
+  // =======================================================
+  // INVENTORY TEST METHODS START END HERE
+  // ==================================================
+
+  // =======================================================
+  // INVOICES TEST METHODS START HERE
+  // ==================================================
 
   /**
    * verify user can create invoice
@@ -156,7 +198,7 @@ export class HomePage {
     // randimization can cause issue for tracing quntity in stock after invoice creation
     await this.customerName.fill(customerName);
     await this.itemSelect.selectOption(item);
-    await this.qtyInput.fill(qty);
+    await this.qtyInput.fill(`${qty}`);
     await this.createInvoiceButton.click();
     await expect(this.invoiceCreatedConfirmation).toBeVisible();
   }
@@ -164,58 +206,132 @@ export class HomePage {
   /**
    * verify custmer name cannot be more than 30 characters
    */
-  async verifyCustomerNameMaxLength(customerName) {
+  async verifyCustomerNameMaxLength(customerName, item, qty) {
     await this.customerName.fill(customerName);
-    const nameValue = await this.customerName.inputValue();
-    expect(nameValue.length).toBeLessThanOrEqual(30);
+    await this.itemSelect.selectOption(item);
+    await this.qtyInput.fill(`${qty}`);
+    await this.createInvoiceButton.click();
+    /**
+     * we are getting json format string value
+     * from the invoice result section and converting it to json to get
+     * the customer name value and verify its length
+     */
+    const jsonBody = await this.invoiceStringData.textContent();
+    const nameInInvoice = await Helper.getValueFromStringAsJson(
+      jsonBody,
+      "customerName"
+    );
+    expect(nameInInvoice.length).toBeLessThanOrEqual(30);
   }
 
   /**
    * verify customer name does not accept special characters
    */
-  async verifyCustomerNameNoSpecialCharacters(customerName) {
+  async verifyCustomerNameNoSpecialCharacters(customerName, item, qty) {
     await this.customerName.fill(customerName);
-    const nameValue = await this.customerName.inputValue();
-    const specialCharPattern = /[!@#$%^&*(),.?":{}|<>]/g;
-    const hasSpecialChars = specialCharPattern.test(nameValue);
-    expect(hasSpecialChars).toBeFalsy();
+    await this.itemSelect.selectOption(item);
+    await this.qtyInput.fill(`${qty}`);
+    await this.createInvoiceButton.click();
+    const jsonBody = await this.invoiceStringData.textContent();
+    const nameInInvoice = await Helper.getValueFromStringAsJson(
+      jsonBody,
+      "customerName"
+    );
+    expect(nameInInvoice).not.toMatch(/[^a-zA-Z0-9\s]/);
   }
 
   /**
    * customer name cannot be empty
    */
-  async verifyCustomerNameNotEmpty(customerName) {
+  async verifyCustomerNameNotEmpty(customerName, item, qty) {
     await this.customerName.fill(customerName);
-    const nameValue = await this.customerName.inputValue();
-    expect(nameValue).not.toBe("");
+    await this.itemSelect.selectOption(item);
+    await this.qtyInput.fill(`${qty}`);
+    await this.createInvoiceButton.click();
+    const jsonBody = await this.invoiceStringData.textContent();
+    const nameInInvoice = await Helper.getValueFromStringAsJson(
+      jsonBody,
+      "customerName"
+    );
+    expect(nameInInvoice).not.toBe("");
   }
 
   /**
    * verify customer name does not accept numeric values
    */
-  async verifyCustomerNameNoNumericValues(customerName) {
+  async verifyCustomerNameNoNumericValues(customerName, item, qty) {
     await this.customerName.fill(customerName);
-    const nameValue = await this.customerName.inputValue();
+    await this.itemSelect.selectOption(item);
+    await this.qtyInput.fill(`${qty}`);
+    await this.createInvoiceButton.click();
+    const jsonBody = await this.invoiceStringData.textContent();
+    const nameInInvoice = await Helper.getValueFromStringAsJson(
+      jsonBody,
+      "customerName"
+    );
     const numericPattern = /[0-9]/g;
-    const hasNumericChars = numericPattern.test(nameValue);
+    const hasNumericChars = numericPattern.test(nameInInvoice);
     expect(hasNumericChars).toBeFalsy();
   }
 
   /**
    * verify quantity input accepts only non decimal values
    */
-  async verifyQuantityInputNonDecimalValues(qty) {
+  async verifyQuantityInputNonDecimalValues(customerName, item, qty) {
+    await this.customerName.fill(customerName);
+    await this.itemSelect.selectOption(item);
     await this.qtyInput.fill(`${qty}`);
-    const qtyValue = await this.qtyInput.inputValue();
-    expect(qtyValue).not.toContain(".");
+    await this.createInvoiceButton.click();
+    const jsonBodyString = await this.invoiceStringData.textContent(); // retun string
+    /**
+     * this is sample json body we are getting from the invoice result section
+     */
+    const jsonBody = await Helper.getEntireValueFromStringAsJson(
+      jsonBodyString
+    );
+
+    const quantity = jsonBody.items[0].quantity;
+    console.log(quantity);
+    // convert quantity to string to verify it does not contain decimal point
+
+    expect(await Helper.convertJsonValueToString(quantity)).not.toContain(".");
   }
 
   /**
    * verify quantity cannot be zero
    */
-  async verifyQuantityInputNonZero(qty) {
+  async verifyQuantityInputNotZero(customerName, item, qty) {
+    await this.customerName.fill(customerName);
+    await this.itemSelect.selectOption(item);
     await this.qtyInput.fill(`${qty}`);
-    const qtyValue = await this.qtyInput.inputValue();
-    expect(Number(qtyValue)).toBeGreaterThan(0);
+    await this.createInvoiceButton.click();
+    const jsonBodyString = await this.invoiceStringData.textContent();
+
+    /**
+     * this is sample json body we are getting from the invoice result section
+     * {
+  "id": 3,
+  "customerName": "sfsdf",
+  "items": [
+    {
+      "itemId": 1,
+      "name": "Laptop",
+      "price": 1200,
+      "quantity": 1
+    }
+  ],
+  "total": 1200,
+  "date": "2026-01-09T20:20:49.299Z"
+}
+     */
+    const jsonBody = await Helper.getEntireValueFromStringAsJson(
+      jsonBodyString
+    );
+    const quantity = jsonBody.items[0].quantity;
+    expect(quantity).toBeGreaterThan(0);
   }
+
+  // =======================================================
+  // INVOICES TEST METHODS END HERE
+  // ==================================================
 }

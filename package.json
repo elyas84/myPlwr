@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "clean": "rm -rf test-output playwright-report",
+    "test": "npm run clean && npx playwright test"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
