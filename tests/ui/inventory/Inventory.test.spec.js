@@ -3,69 +3,61 @@ import { test } from "../../../base/Fixtures";
 test.describe("Inventoty tests", () => {
   // TestId: INV-001
   test("Add new item test", async ({ homePage }) => {
-    await homePage.verifyElementVisibility();
-    await homePage.addNewItemAndVerify("Apple", "1700", "9");
+    await homePage.addNewItemAndVerify("Apple", 1700, 9);
   });
 
   // TestId: INV-002
   test("Fail when item name is empty", async ({ homePage }) => {
-    await homePage.verifyElementVisibility();
-    await homePage.addNewItemWithoutItemName("", "", "");
+    await homePage.addNewItemWithoutItemName("", 10, 6);
   });
   // TestId: INV-003
   test("Verify item is not duplicated", async ({ homePage }) => {
-    await homePage.verifyElementVisibility();
-    await homePage.verifyItemIsDuplicated("Samung Galaxy S21");
+    await homePage.verifyItemIsDuplicated("Samung Galaxy S21", 500, 15);
   });
   // TestId: INV-004
   test("Verify stock input accepts only non decimal values", async ({
     homePage,
   }) => {
-    await homePage.verifyElementVisibility();
-    await homePage.verifyStockInputNonDecimalValues(10.6);
+    await homePage.verifyStockInputNonDecimalValues("TestItem", 1700, 10.6);
   });
   // TestId: INV-005
   test("Verify stock input does not accept negative values", async ({
     homePage,
   }) => {
-    await homePage.verifyElementVisibility();
-    await homePage.verifyStockInputNonNegativeValues(-5);
+    await homePage.verifyStockInputNonNegativeValues("TestItem", 1700, -5);
   });
 
   // TestId: INV-006
   test("Verify price input does not accept negative values", async ({
     homePage,
   }) => {
-    await homePage.verifyElementVisibility();
-    await homePage.verifyPriceInputNonNegativeValues(-1500);
+    await homePage.verifyPriceInputNonNegativeValues("TestItem", -1500, 10);
   });
 
   // TestId: INV-007
   test("Verify stock input does not accept zero", async ({ homePage }) => {
-    await homePage.verifyElementVisibility();
-    await homePage.verifyStockInputNonNegativeValues(0);
+    await homePage.verifyStockInputNonNegativeValues("TestItem", 1700, 0);
   });
 
   // TestId: INV-008
   test("Verify price input does not accept zero", async ({ homePage }) => {
-    await homePage.verifyElementVisibility();
-    await homePage.verifyPriceInputNonNegativeValues(0);
+    await homePage.verifyPriceInputNonNegativeValues("TestItem", 0, 10);
   });
   // TestId: INV-009
   test("Verify item name cannot be more than 20 characters", async ({
     homePage,
   }) => {
-    await homePage.verifyElementVisibility();
     await homePage.verifyItemNameMaxLength(
-      "This is a very long item name that exceeds twenty characters"
+      "This is a very long item name that exceeds twenty characters",
+      10,
+      3
     );
   });
   // TestId: INV-010
   test("Verify item name cannot be special characters", async ({
     homePage,
   }) => {
-    await homePage.verifyElementVisibility();
     const specialCharName = "Item@123!";
-    await homePage.verifyItemNameNoSpecialCharacters(specialCharName);
+    await homePage.verifyItemNameNoSpecialCharacters(specialCharName, 1700, 9);
   });
 });
