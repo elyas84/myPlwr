@@ -2,7 +2,7 @@ import { test } from "../../../base/Fixtures";
 import invoices from "../../../resource/invoices.json";
 
 test.describe("Sales report tests", () => {
-  test("Report Sales", { tag: ["@smoke"] }, async ({ homePage }) => {
+  test("Sales report", { tag: ["@smoke"] }, async ({ homePage }) => {
     let sales = [];
     for (let i = 0; i < invoices.length; i++) {
       sales.push(
