@@ -26,6 +26,10 @@ export class HomePage {
     this.invoiceStringData = page.locator(
       "//div[@id='invoiceResult']/p/following-sibling::*[1]"
     );
+    this.generateSalesReportButton = page.locator(
+      "//button[text()='Generate Sales Report']"
+    );
+    this.totalSalesSection = page.locator("//div[@id='reportResult']/p[1]");
   }
 
   // =======================================================
@@ -46,6 +50,7 @@ export class HomePage {
     await expect(this.itemSelect).toBeVisible();
     await expect(this.qtyInput).toBeVisible();
     await expect(this.createInvoiceButton).toBeVisible();
+    await expect(this.generateSalesReportButton).toBeVisible();
   }
 
   /**
@@ -87,7 +92,6 @@ export class HomePage {
   async verifyItemNameNoSpecialCharacters(itemName, itemPrice, itemStock) {
     await this.addItemAndSubmit(itemName, itemPrice, itemStock);
     const sentItemTitle = await this.itemNameColumn.last().textContent();
-    //await this.page.waitForTimeout(1000);
     expect(sentItemTitle).not.toMatch(/[^a-zA-Z0-9\s]/);
   }
 
@@ -299,7 +303,78 @@ export class HomePage {
     expect(quantity).toBeGreaterThan(0);
   }
 
+  /**
+   * verify item quantity should be updated
+   */
+
+  async verifyItemQuantityUpdates(customerName, item, qty) {
+    //Grabbing item name -> checking the stock number
+    // Monitor ($300) --> needs to be splited ["Mo", "(300)"]
+    const itemSplit = item.split(" (")[0];
+
+    let initialStockNumber = 1; // default number = 1;
+    for (let i = 0; i < (await this.itemNameColumn.count()); i++) {
+      const itemNameText = await this.itemNameColumn.nth(i).textContent();
+      if (itemNameText.includes(itemSplit)) {
+        // internal locator for dynamic xpath
+        const stockInText = await this.page
+          .locator(
+            "//table//tbody/tr/td[contains(text(),'" +
+              `${itemSplit}` +
+              "')]/following-sibling::td[2]"
+          )
+          .textContent();
+        initialStockNumber = Number(stockInText);
+        break;
+      }
+    }
+    // create an invoce
+    await this.addInvoiceAndSubmit(customerName, item, qty);
+    expect(initialStockNumber).toBe(initialStockNumber - qty);
+  }
+
   // =======================================================
   // INVOICES TEST METHODS END HERE
   // ==================================================
+
+  // =======================================================
+  // SALE REPORT TEST METHODS START HERE
+  // ==================================================
+
+  /**
+   * Verify Sales report
+   */
+
+  async verifySalesReport(customerName, item, qty) {
+    let sales = 0;
+    // create an invoce
+    await this.addInvoiceAndSubmit(customerName, item, qty);
+    await this.page.waitForTimeout(500);
+    // we are getting total value from json body
+    const jsonBody = await this.invoiceStringData.textContent();
+    const totalInJson = await Helper.getValueFromStringAsJson(
+      jsonBody,
+      "total"
+    );
+
+    sales = totalInJson;
+    return sales;
+  }
+
+  /**
+   * Gathering total sales
+   */
+
+  async gatherTotalSales(sales) {
+    const total = sales.reduce((sum, n) => sum + n, 0);
+    await this.generateSalesReportButton.click();
+    await expect(this.totalSalesSection).toBeVisible();
+    //Total Sales (incl. bugs): $5087.50
+    let toatalSalesText = await this.totalSalesSection.textContent();
+    let splitTextByColon = toatalSalesText.split(":")[1];
+    // $5087.50
+    let splitTextBy_dollarSign = splitTextByColon.split("$")[1];
+    // expect(actual).toBe(expcted);
+    expect(Number(splitTextBy_dollarSign)).toBe(total);
+  }
 }

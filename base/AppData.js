@@ -1,0 +1,1 @@
+export const DORP_DOWN_ITEM = "Mouse ($25)";

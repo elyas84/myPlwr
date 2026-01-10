@@ -1,9 +1,10 @@
 import { test } from "../../../base/Fixtures";
+import { DORP_DOWN_ITEM } from "../../../base/AppData";
 
 test.describe("Invoices tests", () => {
   // TestId: INV-001
   test("Add new invoice", { tag: ["@smoke"] }, async ({ homePage }) => {
-    await homePage.verifyUserCanCreateInvoice("John Doe", "Laptop ($1200)", 2);
+    await homePage.verifyUserCanCreateInvoice("John Doe", DORP_DOWN_ITEM, 2);
   });
 
   // TestId: INV-002
@@ -11,7 +12,7 @@ test.describe("Invoices tests", () => {
     const longCustomerName = "ThisIsAVeryLongCustomerNameExceedingTheLimit";
     await homePage.verifyCustomerNameMaxLength(
       longCustomerName,
-      "Laptop ($1200)",
+      DORP_DOWN_ITEM,
       2
     );
   });
@@ -21,14 +22,14 @@ test.describe("Invoices tests", () => {
     const specialCharName = "John@Doe!";
     await homePage.verifyCustomerNameNoSpecialCharacters(
       specialCharName,
-      "Laptop ($1200)",
+      DORP_DOWN_ITEM,
       2
     );
   });
   // TestId: INV-004
   test("Customer name not empty", async ({ homePage }) => {
     const emptyName = "";
-    await homePage.verifyCustomerNameNotEmpty(emptyName, "Laptop ($1200)", 2);
+    await homePage.verifyCustomerNameNotEmpty(emptyName, DORP_DOWN_ITEM, 2);
   });
 
   // TestId: INV-005
@@ -36,7 +37,7 @@ test.describe("Invoices tests", () => {
     const numericName = "John123";
     await homePage.verifyCustomerNameNoNumericValues(
       numericName,
-      "Laptop ($1200)",
+      DORP_DOWN_ITEM,
       2
     );
   });
@@ -44,17 +45,19 @@ test.describe("Invoices tests", () => {
   test("Qty cannot be decimal number", async ({ homePage }) => {
     await homePage.verifyQuantityInputNonDecimalValues(
       "John Doe",
-      "Laptop ($1200)",
+      DORP_DOWN_ITEM,
       5.5
     );
   });
   // TestId: INV-007
   test("Qty cannot be zero", async ({ homePage }) => {
-    await homePage.verifyQuantityInputNotZero("John Doe", "Laptop ($1200)", 0);
+    await homePage.verifyQuantityInputNotZero("John Doe", DORP_DOWN_ITEM, 0);
   });
 
   // TestId: INV-008
-  test("Quantity shuld be updated test after invoice creation", async ({
+  test("Quantity shuld be updated after invoice creation", async ({
     homePage,
-  }) => {});
+  }) => {
+    await homePage.verifyItemQuantityUpdates("John Doe", DORP_DOWN_ITEM, 10);
+  });
 });

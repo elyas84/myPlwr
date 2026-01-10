@@ -1,0 +1,17 @@
+[
+  {
+    "name": "John Doe",
+    "item": "Laptop ($1200)",
+    "quantity": 1
+  },
+  {
+    "name": "Mike Smith",
+    "item": "Mouse ($25)",
+    "quantity": 2
+  },
+  {
+    "name": "Carl Mike",
+    "item": "Monitor ($300)",
+    "quantity": 1
+  }
+]
