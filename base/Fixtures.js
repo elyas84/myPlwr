@@ -15,9 +15,9 @@ export const test = base.extend({
     // taking screenshot
     if (testInfo.status !== testInfo.expectedStatus) {
       await page.screenshot({
-        // create date-time folder for screenshots
+        // attaching testName along with screenshot for readibility
 
-        path: "test-output/screenshot_" + Date.now() + ".png",
+        path: "test-output/" + testInfo.title + ".png",
         fullPage: true,
       });
     }
