@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clean": "npx rimraf test-output playwright-report",
+    "clean": "npx rimraf test-output playwright-report test-results",
     "test": "npm run clean && npx playwright test",
     "smoke": "npx playwright test --grep @smoke"
   },
