@@ -2,7 +2,7 @@ import { test } from "../../../base/Fixtures";
 
 test.describe("Inventoty tests", () => {
   // TestId: INV-001
-  test("Add new item test", async ({ homePage }) => {
+  test("Add new item test", { tag: ["@smoke"] }, async ({ homePage }) => {
     await homePage.addNewItemAndVerify("Apple", 1700, 9);
   });
 

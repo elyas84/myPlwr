@@ -2,12 +2,12 @@ import { test } from "../../../base/Fixtures";
 
 test.describe("Invoices tests", () => {
   // TestId: INV-001
-  test("Add new invoice test", async ({ homePage }) => {
+  test("Add new invoice", { tag: ["@smoke"] }, async ({ homePage }) => {
     await homePage.verifyUserCanCreateInvoice("John Doe", "Laptop ($1200)", 2);
   });
 
   // TestId: INV-002
-  test("Customer name max length test", async ({ homePage }) => {
+  test("Customer name max length", async ({ homePage }) => {
     const longCustomerName = "ThisIsAVeryLongCustomerNameExceedingTheLimit";
     await homePage.verifyCustomerNameMaxLength(
       longCustomerName,
@@ -17,7 +17,7 @@ test.describe("Invoices tests", () => {
   });
 
   // TestId: INV-003
-  test("Customer name special characters test", async ({ homePage }) => {
+  test("Customer name special characters", async ({ homePage }) => {
     const specialCharName = "John@Doe!";
     await homePage.verifyCustomerNameNoSpecialCharacters(
       specialCharName,
@@ -26,13 +26,13 @@ test.describe("Invoices tests", () => {
     );
   });
   // TestId: INV-004
-  test("Customer name not empty test", async ({ homePage }) => {
+  test("Customer name not empty", async ({ homePage }) => {
     const emptyName = "";
     await homePage.verifyCustomerNameNotEmpty(emptyName, "Laptop ($1200)", 2);
   });
 
   // TestId: INV-005
-  test("Customer name numeric values test", async ({ homePage }) => {
+  test("Customer name numeric values", async ({ homePage }) => {
     const numericName = "John123";
     await homePage.verifyCustomerNameNoNumericValues(
       numericName,
@@ -41,7 +41,7 @@ test.describe("Invoices tests", () => {
     );
   });
   // TestId: INV-006
-  test("Qty cannot be decimal number test", async ({ homePage }) => {
+  test("Qty cannot be decimal number", async ({ homePage }) => {
     await homePage.verifyQuantityInputNonDecimalValues(
       "John Doe",
       "Laptop ($1200)",
@@ -49,7 +49,7 @@ test.describe("Invoices tests", () => {
     );
   });
   // TestId: INV-007
-  test("Qty cannot be zero test", async ({ homePage }) => {
+  test("Qty cannot be zero", async ({ homePage }) => {
     await homePage.verifyQuantityInputNotZero("John Doe", "Laptop ($1200)", 0);
   });
 

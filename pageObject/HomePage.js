@@ -49,13 +49,21 @@ export class HomePage {
   }
 
   /**
-   * add new item to the inventory and verify it is added
+   * Common fucntion to add Items
    */
-  async addNewItemAndVerify(itemName, itemPrice, itemStock) {
+
+  async addItemAndSubmit(itemName, itemPrice, itemStock) {
     await this.nameInput.fill(itemName);
     await this.priceInput.fill(`${itemPrice}`);
     await this.stockInput.fill(`${itemStock}`);
     await this.addButton.click();
+  }
+
+  /**
+   * add new item to the inventory and verify it is added
+   */
+  async addNewItemAndVerify(itemName, itemPrice, itemStock) {
+    await this.addItemAndSubmit(itemName, itemPrice, itemStock);
     const lastRow = await this.tablerows.last();
     await expect(lastRow).toContainText(itemName);
     await expect(lastRow).toContainText(`${itemPrice}`);
@@ -68,10 +76,7 @@ export class HomePage {
    * add new item without item name to the inventory and verify it is not added
    */
   async addNewItemWithoutItemName(itemName, itemPrice, itemStock) {
-    await this.nameInput.fill(itemName);
-    await this.priceInput.fill(`${itemPrice}`);
-    await this.stockInput.fill(`${itemStock}`);
-    await this.addButton.click();
+    await this.addItemAndSubmit(itemName, itemPrice, itemStock);
     const lastItemName = await this.itemNameColumn.last();
     await expect(lastItemName).not.toBeEmpty();
   }
@@ -80,12 +85,9 @@ export class HomePage {
    * verify item name cannot be special characters
    */
   async verifyItemNameNoSpecialCharacters(itemName, itemPrice, itemStock) {
-    await this.nameInput.fill(itemName);
-    await this.priceInput.fill(`${itemPrice}`);
-    await this.stockInput.fill(`${itemStock}`);
-    await this.addButton.click();
+    await this.addItemAndSubmit(itemName, itemPrice, itemStock);
     const sentItemTitle = await this.itemNameColumn.last().textContent();
-    await this.page.waitForTimeout(1000);
+    //await this.page.waitForTimeout(1000);
     expect(sentItemTitle).not.toMatch(/[^a-zA-Z0-9\s]/);
   }
 
@@ -97,10 +99,7 @@ export class HomePage {
     // we are intentilally adding the same item again to verify it is not duplicated
     // step one to add same item twice
     for (let i = 0; i < 2; i++) {
-      await this.nameInput.fill(itemName);
-      await this.priceInput.fill(`${itemPrice}`);
-      await this.stockInput.fill(`${itemStock}`);
-      await this.addButton.click();
+      await this.addItemAndSubmit(itemName, itemPrice, itemStock);
       await this.page.waitForTimeout(1000);
     }
     // step two to verify item is not duplicated
@@ -121,12 +120,8 @@ export class HomePage {
    * verifying stock input accepts only non decimal values
    */
 
-  async verifyStockInputNonDecimalValues(itemName, itemPrice, stock) {
-    await this.nameInput.fill(itemName);
-    await this.priceInput.fill(`${itemPrice}`);
-    await this.stockInput.fill(`${stock}`);
-    await this.addButton.click();
-    await this.page.waitForTimeout(1000);
+  async verifyStockInputNonDecimalValues(itemName, itemPrice, itemStock) {
+    await this.addItemAndSubmit(itemName, itemPrice, itemStock);
     const stockValue = await this.itemStockColumn.last().textContent();
     expect(stockValue).not.toContain(".");
   }
@@ -134,12 +129,8 @@ export class HomePage {
   /**
    * verifying negative values are not accepted in price input
    */
-  async verifyPriceInputNonNegativeValues(itemName, itemPrice, stock) {
-    await this.nameInput.fill(itemName);
-    await this.priceInput.fill(`${itemPrice}`);
-    await this.stockInput.fill(`${stock}`);
-    await this.addButton.click();
-    await this.page.waitForTimeout(1000);
+  async verifyPriceInputNonNegativeValues(itemName, itemPrice, itemStock) {
+    await this.addItemAndSubmit(itemName, itemPrice, itemStock);
     const priceValue = await this.itemPriceColumn.last().textContent();
     expect(Number(priceValue.substring(1))).toBeGreaterThan(0);
   }
@@ -147,12 +138,8 @@ export class HomePage {
   /**
    * veiryfying negative values are not accepted in stock input
    */
-  async verifyStockInputNonNegativeValues(itemName, itemPrice, stock) {
-    await this.nameInput.fill(itemName);
-    await this.priceInput.fill(`${itemPrice}`);
-    await this.stockInput.fill(`${stock}`);
-    await this.addButton.click();
-    await this.page.waitForTimeout(1000);
+  async verifyStockInputNonNegativeValues(itemName, itemPrice, itemStock) {
+    await this.addItemAndSubmit(itemName, itemPrice, itemStock);
     const stockValue = await this.itemStockColumn.last().textContent();
     expect(Number(stockValue)).toBeGreaterThan(0);
   }
@@ -160,12 +147,8 @@ export class HomePage {
   /**
    * verifying price input accepts only positive values
    */
-  async verifyPriceInputPositiveValues(itemName, itemPrice, stock) {
-    await this.nameInput.fill(itemName);
-    await this.priceInput.fill(`${itemPrice}`);
-    await this.stockInput.fill(`${stock}`);
-    await this.addButton.click();
-    await this.page.waitForTimeout(1000);
+  async verifyPriceInputPositiveValues(itemName, itemPrice, itemStock) {
+    await this.addItemAndSubmit(itemName, itemPrice, itemStock);
     const priceValue = await this.itemPriceColumn.last().textContent();
     expect(Number(priceValue)).toBeGreaterThan(0);
   }
@@ -173,12 +156,8 @@ export class HomePage {
   /**
    * verify item name cannot be mor than 20 characters
    */
-  async verifyItemNameMaxLength(itemName, itemPrice, stock) {
-    await this.nameInput.fill(itemName);
-    await this.priceInput.fill(`${itemPrice}`);
-    await this.stockInput.fill(`${stock}`);
-    await this.addButton.click();
-    await this.page.waitForTimeout(1000);
+  async verifyItemNameMaxLength(itemName, itemPrice, itemStock) {
+    await this.addItemAndSubmit(itemName, itemPrice, itemStock);
     const nameValue = await this.itemNameColumn.last().textContent();
     expect(nameValue.length).toBeLessThanOrEqual(20);
   }
@@ -192,14 +171,22 @@ export class HomePage {
   // ==================================================
 
   /**
-   * verify user can create invoice
+   * Common fucntion to add invoce
    */
-  async verifyUserCanCreateInvoice(customerName, item, qty) {
-    // randimization can cause issue for tracing quntity in stock after invoice creation
+
+  async addInvoiceAndSubmit(customerName, item, qty) {
     await this.customerName.fill(customerName);
     await this.itemSelect.selectOption(item);
     await this.qtyInput.fill(`${qty}`);
     await this.createInvoiceButton.click();
+  }
+
+  /**
+   * verify user can create invoice
+   */
+  async verifyUserCanCreateInvoice(customerName, item, qty) {
+    // randimization can cause issue for tracing quntity in stock after invoice creation
+    await this.addInvoiceAndSubmit(customerName, item, qty);
     await expect(this.invoiceCreatedConfirmation).toBeVisible();
   }
 
@@ -207,10 +194,7 @@ export class HomePage {
    * verify custmer name cannot be more than 30 characters
    */
   async verifyCustomerNameMaxLength(customerName, item, qty) {
-    await this.customerName.fill(customerName);
-    await this.itemSelect.selectOption(item);
-    await this.qtyInput.fill(`${qty}`);
-    await this.createInvoiceButton.click();
+    await this.addInvoiceAndSubmit(customerName, item, qty);
     /**
      * we are getting json format string value
      * from the invoice result section and converting it to json to get
@@ -228,10 +212,7 @@ export class HomePage {
    * verify customer name does not accept special characters
    */
   async verifyCustomerNameNoSpecialCharacters(customerName, item, qty) {
-    await this.customerName.fill(customerName);
-    await this.itemSelect.selectOption(item);
-    await this.qtyInput.fill(`${qty}`);
-    await this.createInvoiceButton.click();
+    await this.addInvoiceAndSubmit(customerName, item, qty);
     const jsonBody = await this.invoiceStringData.textContent();
     const nameInInvoice = await Helper.getValueFromStringAsJson(
       jsonBody,
@@ -244,10 +225,7 @@ export class HomePage {
    * customer name cannot be empty
    */
   async verifyCustomerNameNotEmpty(customerName, item, qty) {
-    await this.customerName.fill(customerName);
-    await this.itemSelect.selectOption(item);
-    await this.qtyInput.fill(`${qty}`);
-    await this.createInvoiceButton.click();
+    await this.addInvoiceAndSubmit(customerName, item, qty);
     const jsonBody = await this.invoiceStringData.textContent();
     const nameInInvoice = await Helper.getValueFromStringAsJson(
       jsonBody,
@@ -260,10 +238,7 @@ export class HomePage {
    * verify customer name does not accept numeric values
    */
   async verifyCustomerNameNoNumericValues(customerName, item, qty) {
-    await this.customerName.fill(customerName);
-    await this.itemSelect.selectOption(item);
-    await this.qtyInput.fill(`${qty}`);
-    await this.createInvoiceButton.click();
+    await this.addInvoiceAndSubmit(customerName, item, qty);
     const jsonBody = await this.invoiceStringData.textContent();
     const nameInInvoice = await Helper.getValueFromStringAsJson(
       jsonBody,
@@ -278,10 +253,7 @@ export class HomePage {
    * verify quantity input accepts only non decimal values
    */
   async verifyQuantityInputNonDecimalValues(customerName, item, qty) {
-    await this.customerName.fill(customerName);
-    await this.itemSelect.selectOption(item);
-    await this.qtyInput.fill(`${qty}`);
-    await this.createInvoiceButton.click();
+    await this.addInvoiceAndSubmit(customerName, item, qty);
     const jsonBodyString = await this.invoiceStringData.textContent(); // retun string
     /**
      * this is sample json body we are getting from the invoice result section
@@ -291,7 +263,6 @@ export class HomePage {
     );
 
     const quantity = jsonBody.items[0].quantity;
-    console.log(quantity);
     // convert quantity to string to verify it does not contain decimal point
 
     expect(await Helper.convertJsonValueToString(quantity)).not.toContain(".");
@@ -301,10 +272,7 @@ export class HomePage {
    * verify quantity cannot be zero
    */
   async verifyQuantityInputNotZero(customerName, item, qty) {
-    await this.customerName.fill(customerName);
-    await this.itemSelect.selectOption(item);
-    await this.qtyInput.fill(`${qty}`);
-    await this.createInvoiceButton.click();
+    await this.addInvoiceAndSubmit(customerName, item, qty);
     const jsonBodyString = await this.invoiceStringData.textContent();
 
     /**
